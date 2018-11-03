@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>WebSocket客户端</title>
+    <script type="text/javascript">
+        var socket;
+        if (!window.WebSocket) {
+            window.WebSocket = window.MozWebSocket;
+        }
+
+        if (window.WebSocket) {
+            socket = new WebSocket("ws://localhost:8080/websocket");
+            socket.onmessage = function (ev) {
+                var ta = document.getElementById('responseContent');
+                ta.value += ev.data + "\r\n";
+            };
+
+            socket.onopen = function (ev) {
+                var ta = document.getElementById('responseContent');
+                ta.value = "您当前的浏览器支持WebSocket, 请进行后续操作\r\n";
+            };
+
+            socket.onclose = function (ev) {
+                var ta = document.getElementById('responseContent');
+                ta.value = "WebSocket连接已经关闭\r\n";
+            };
+
+            socket.onerror = function (ev) {
+                var ta = document.getElementById('responseContent');
+                ta.value = ev.data + "WebSocket连接异常\r\n";
+            };
+        } else {
+            alert("您的浏览器不支持WebSocket");
+        }
+
+        function send(message) {
+            if (!window.WebSocket) {
+                return;
+            }
+
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(message);
+            } else {
+                alert("WebSocket连接建立失败, 请重试");
+                console.log(socket.readyState)
+            }
+        }
+    </script>
+</head>
+<body>
+<form onsubmit="return false;">
+    <label for="message">
+        <input type="text" id="message" name="message" value=""/>
+    </label>
+    <br><br>
+    <input type="button" value="发送WebSocket请求消息" onclick="send(this.form.message.value)"/>
+    <br><br>
+    <hr color="red" size="5">
+    <h2>客户端接收到服务端返回的应答消息: </h2>
+    <label for="responseContent">
+        <textarea id="responseContent" style="width: 1024px;height: 300px"></textarea>
+    </label>
+</form>
+</body>
+</html>
